@@ -1,20 +1,15 @@
 import { Box } from "@mui/material";
 
-export default function VideoDisplay({
-  videoRef,
-  canvasRef,
-  isCameraActive,
-  isDetecting,
-}) {
+export default function VideoDisplay({ videoRef, canvasRef, isCameraActive }) {
   return (
     <Box
       sx={{
-        position: "relative",
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100vw",
+        height: "100vh",
         display: isCameraActive ? "block" : "none",
-        width: "100%",
-        maxWidth: "800px",
-        mx: "auto",
-        mb: 3,
       }}
     >
       <video
@@ -24,11 +19,10 @@ export default function VideoDisplay({
         muted
         style={{
           width: "100%",
-          minHeight: "400px",
+          height: "100%",
           display: "block",
           backgroundColor: "#000",
-          border: isDetecting ? "3px solid #4CAF50" : "3px solid #2196F3",
-          borderRadius: "8px",
+          objectFit: "cover",
         }}
       />
       <canvas
