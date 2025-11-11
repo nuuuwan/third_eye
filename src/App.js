@@ -48,6 +48,8 @@ function App() {
       setDetections([]);
       setStatusMessage("Camera active - detecting objects...");
 
+      cameraUtils.startRecording();
+
       if (objectDetector) {
         setIsDetecting(true);
       }
@@ -57,21 +59,43 @@ function App() {
       alert(
         "Error accessing camera: " +
           error.message +
-          "\n\nPlease make sure you've granted camera permissions.",
+          "\n\nPlease make sure you've granted camera permissions."
       );
     }
   };
 
-  const stopCamera = () => {
+  const stopCamera = async () => {
     setIsDetecting(false);
 
     const appUtils = appUtilsRef.current;
     appUtils.stopDetectionLoop();
 
     const cameraUtils = cameraUtilsRef.current;
+
+    const videoBlob = await cameraUtils.stopRecording();
+
     cameraUtils.stopCamera();
     setIsCameraActive(false);
     setStatusMessage("");
+
+    if (videoBlob) {
+      const shouldSave = window.confirm("Do you want to save the video?");
+
+      if (shouldSave) {
+        const url = URL.createObjectURL(videoBlob);
+        const a = document.createElement("a");
+        a.style.display = "none";
+        a.href = url;
+        const extension = videoBlob.type.includes("mp4") ? "mp4" : "webm";
+        a.download = `third_eye_${new Date().getTime()}.${extension}`;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 100);
+      }
+    }
   };
 
   useEffect(() => {
