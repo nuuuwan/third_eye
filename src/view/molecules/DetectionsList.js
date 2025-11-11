@@ -12,16 +12,20 @@ export default function DetectionsList({ detections, isCameraActive }) {
       </Typography>
       <List>
         {detections.map((detection, index) => (
-          <ListItem key={index} divider={index < detections.length - 1}>
+          <ListItem
+            key={index}
+            sx={{
+              borderBottom:
+                index < detections.length - 1
+                  ? "1px solid rgba(0, 0, 0, 0.12)"
+                  : "none",
+            }}
+          >
             <ListItemText
               primary={detection.categories[0].categoryName}
               secondary={`Confidence: ${Math.round(
-                detection.categories[0].score * 100,
+                detection.categories[0].score * 100
               )}%`}
-              primaryTypographyProps={{
-                fontWeight: "bold",
-                textTransform: "capitalize",
-              }}
             />
           </ListItem>
         ))}
