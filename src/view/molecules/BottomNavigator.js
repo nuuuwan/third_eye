@@ -1,5 +1,12 @@
-import { Paper, BottomNavigation, BottomNavigationAction } from "@mui/material";
+import {
+  Paper,
+  BottomNavigation,
+  BottomNavigationAction,
+  Box,
+  Typography,
+} from "@mui/material";
 import { Videocam, VideocamOff } from "@mui/icons-material";
+import VERSION from "../../nonview/constants/VERSION";
 
 export default function BottomNavigator({
   isCameraActive,
@@ -17,7 +24,7 @@ export default function BottomNavigator({
   return (
     <Paper
       sx={{ position: "fixed", bottom: 0, left: 0, right: 0 }}
-      elevation={3}
+      elevation={1}
     >
       <BottomNavigation
         showLabels={false}
@@ -49,6 +56,17 @@ export default function BottomNavigator({
           />
         )}
       </BottomNavigation>
+      <Box
+        sx={{
+          textAlign: "center",
+          p: 0,
+          m: 0,
+        }}
+      >
+        <Typography variant="caption" color="text.secondary">
+          v{VERSION.DATETIME_STR}
+        </Typography>
+      </Box>
     </Paper>
   );
 }
