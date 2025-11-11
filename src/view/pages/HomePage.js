@@ -1,9 +1,8 @@
-import { Container, Typography, Box } from "@mui/material";
+import { Container } from "@mui/material";
 import StatusMessage from "../atoms/StatusMessage";
 import LoadingIndicator from "../atoms/LoadingIndicator";
 import BottomNavigator from "../molecules/BottomNavigator";
 import VideoDisplay from "../molecules/VideoDisplay";
-import DetectionsList from "../molecules/DetectionsList";
 
 export default function HomePage({
   statusMessage,
@@ -26,11 +25,6 @@ export default function HomePage({
           canvasRef={canvasRef}
           isCameraActive={isCameraActive}
           isDetecting={isDetecting}
-        />
-
-        <DetectionsList
-          detections={detections}
-          isCameraActive={isCameraActive}
         />
 
         {!objectDetector && (
