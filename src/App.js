@@ -1,6 +1,18 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { FilesetResolver, ObjectDetector } from "@mediapipe/tasks-vision";
 import CameraUtils from "./nonview/core/CameraUtils";
+import {
+  Container,
+  Box,
+  Typography,
+  Button,
+  Paper,
+  List,
+  ListItem,
+  ListItemText,
+  CircularProgress,
+} from "@mui/material";
+import { Videocam, VideocamOff, PlayArrow, Stop } from "@mui/icons-material";
 
 function App() {
   const [detections, setDetections] = useState([]);
@@ -181,138 +193,131 @@ function App() {
   };
 
   return (
-    <div className="App">
-      <div style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
-        <h1>Third Eye - Object Detection</h1>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Typography variant="h3" component="h1" gutterBottom align="center">
+        Third Eye - Object Detection
+      </Typography>
 
-        {statusMessage && (
-          <p
-            style={{
-              color: "#2196F3",
-              fontWeight: "bold",
-              marginBottom: "10px",
-            }}
-          >
-            {statusMessage}
-          </p>
-        )}
-
-        <div style={{ marginBottom: "20px" }}>
-          {!isCameraActive && (
-            <button
-              onClick={startCamera}
-              style={{
-                padding: "10px 20px",
-                fontSize: "16px",
-                cursor: "pointer",
-                backgroundColor: "#2196F3",
-                color: "white",
-                border: "none",
-                borderRadius: "4px",
-                marginRight: "10px",
-              }}
-            >
-              Start Camera
-            </button>
-          )}
-
-          {isCameraActive && (
-            <>
-              <button
-                onClick={() => setIsDetecting(!isDetecting)}
-                disabled={!objectDetector}
-                style={{
-                  padding: "10px 20px",
-                  fontSize: "16px",
-                  cursor: !objectDetector ? "not-allowed" : "pointer",
-                  backgroundColor: !objectDetector
-                    ? "#ccc"
-                    : isDetecting
-                    ? "#FF9800"
-                    : "#4CAF50",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "4px",
-                  marginRight: "10px",
-                }}
-              >
-                {isDetecting ? "Stop Detection" : "Start Detection"}
-              </button>
-              <button
-                onClick={stopCamera}
-                style={{
-                  padding: "10px 20px",
-                  fontSize: "16px",
-                  cursor: "pointer",
-                  backgroundColor: "#f44336",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "4px",
-                  marginRight: "10px",
-                }}
-              >
-                Stop Camera
-              </button>
-            </>
-          )}
-        </div>
-
-        <div
-          style={{
-            position: "relative",
-            display: isCameraActive ? "inline-block" : "none",
-            width: "100%",
-            maxWidth: "800px",
-          }}
+      {statusMessage && (
+        <Typography
+          variant="body1"
+          color="primary"
+          fontWeight="bold"
+          sx={{ mb: 2 }}
+          align="center"
         >
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted
-            style={{
-              width: "100%",
-              minHeight: "400px",
-              display: "block",
-              backgroundColor: "#000",
-              border: isDetecting ? "2px solid #4CAF50" : "2px solid #2196F3",
-              borderRadius: "8px",
-            }}
-          />
-          <canvas
-            ref={canvasRef}
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              pointerEvents: "none",
-            }}
-          />
-        </div>
+          {statusMessage}
+        </Typography>
+      )}
 
-        {detections.length > 0 && isCameraActive && (
-          <div style={{ marginTop: "20px" }}>
-            <h2>Detected Objects ({detections.length})</h2>
-            <ul style={{ textAlign: "left" }}>
-              {detections.map((detection, index) => (
-                <li key={index}>
-                  <strong>{detection.categories[0].categoryName}</strong> -
-                  Confidence: {Math.round(detection.categories[0].score * 100)}%
-                </li>
-              ))}
-            </ul>
-          </div>
+      <Box sx={{ mb: 3, display: "flex", gap: 2, justifyContent: "center" }}>
+        {!isCameraActive && (
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            startIcon={<Videocam />}
+            onClick={startCamera}
+          >
+            Start Camera
+          </Button>
         )}
 
-        {!objectDetector && (
-          <p style={{ marginTop: "20px", color: "#666" }}>
+        {isCameraActive && (
+          <>
+            <Button
+              variant="contained"
+              color={isDetecting ? "warning" : "success"}
+              size="large"
+              startIcon={isDetecting ? <Stop /> : <PlayArrow />}
+              onClick={() => setIsDetecting(!isDetecting)}
+              disabled={!objectDetector}
+            >
+              {isDetecting ? "Stop Detection" : "Start Detection"}
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              size="large"
+              startIcon={<VideocamOff />}
+              onClick={stopCamera}
+            >
+              Stop Camera
+            </Button>
+          </>
+        )}
+      </Box>
+
+      <Box
+        sx={{
+          position: "relative",
+          display: isCameraActive ? "block" : "none",
+          width: "100%",
+          maxWidth: "800px",
+          mx: "auto",
+          mb: 3,
+        }}
+      >
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          muted
+          style={{
+            width: "100%",
+            minHeight: "400px",
+            display: "block",
+            backgroundColor: "#000",
+            border: isDetecting ? "3px solid #4CAF50" : "3px solid #2196F3",
+            borderRadius: "8px",
+          }}
+        />
+        <canvas
+          ref={canvasRef}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            pointerEvents: "none",
+          }}
+        />
+      </Box>
+
+      {detections.length > 0 && isCameraActive && (
+        <Paper elevation={3} sx={{ p: 3, maxWidth: "800px", mx: "auto" }}>
+          <Typography variant="h5" gutterBottom>
+            Detected Objects ({detections.length})
+          </Typography>
+          <List>
+            {detections.map((detection, index) => (
+              <ListItem key={index} divider={index < detections.length - 1}>
+                <ListItemText
+                  primary={detection.categories[0].categoryName}
+                  secondary={`Confidence: ${Math.round(
+                    detection.categories[0].score * 100
+                  )}%`}
+                  primaryTypographyProps={{
+                    fontWeight: "bold",
+                    textTransform: "capitalize",
+                  }}
+                />
+              </ListItem>
+            ))}
+          </List>
+        </Paper>
+      )}
+
+      {!objectDetector && (
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 3, gap: 2 }}>
+          <CircularProgress size={24} />
+          <Typography variant="body1" color="text.secondary">
             Loading object detector model...
-          </p>
-        )}
-      </div>
-    </div>
+          </Typography>
+        </Box>
+      )}
+    </Container>
   );
 }
 
