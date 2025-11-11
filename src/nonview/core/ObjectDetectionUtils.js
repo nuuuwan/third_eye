@@ -12,7 +12,7 @@ export default class ObjectDetectionUtils {
       const defaultOptions = {
         wasmPath: "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm",
         modelPath:
-          "https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite",
+          "https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite2/float16/1/efficientdet_lite2.tflite",
         scoreThreshold: options.scoreThreshold || DETECTION.SCORE_THRESHOLD,
         runningMode: options.runningMode || "VIDEO",
       };
