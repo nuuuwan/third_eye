@@ -1,18 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { FilesetResolver, ObjectDetector } from "@mediapipe/tasks-vision";
 import CameraUtils from "./nonview/core/CameraUtils";
-import {
-  Container,
-  Box,
-  Typography,
-  Button,
-  Paper,
-  List,
-  ListItem,
-  ListItemText,
-  CircularProgress,
-} from "@mui/material";
-import { Videocam, VideocamOff, PlayArrow, Stop } from "@mui/icons-material";
+import HomePage from "./view/pages/HomePage";
 
 function App() {
   const [detections, setDetections] = useState([]);
@@ -193,131 +182,18 @@ function App() {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h3" component="h1" gutterBottom align="center">
-        Third Eye - Object Detection
-      </Typography>
-
-      {statusMessage && (
-        <Typography
-          variant="body1"
-          color="primary"
-          fontWeight="bold"
-          sx={{ mb: 2 }}
-          align="center"
-        >
-          {statusMessage}
-        </Typography>
-      )}
-
-      <Box sx={{ mb: 3, display: "flex", gap: 2, justifyContent: "center" }}>
-        {!isCameraActive && (
-          <Button
-            variant="contained"
-            color="primary"
-            size="large"
-            startIcon={<Videocam />}
-            onClick={startCamera}
-          >
-            Start Camera
-          </Button>
-        )}
-
-        {isCameraActive && (
-          <>
-            <Button
-              variant="contained"
-              color={isDetecting ? "warning" : "success"}
-              size="large"
-              startIcon={isDetecting ? <Stop /> : <PlayArrow />}
-              onClick={() => setIsDetecting(!isDetecting)}
-              disabled={!objectDetector}
-            >
-              {isDetecting ? "Stop Detection" : "Start Detection"}
-            </Button>
-            <Button
-              variant="contained"
-              color="error"
-              size="large"
-              startIcon={<VideocamOff />}
-              onClick={stopCamera}
-            >
-              Stop Camera
-            </Button>
-          </>
-        )}
-      </Box>
-
-      <Box
-        sx={{
-          position: "relative",
-          display: isCameraActive ? "block" : "none",
-          width: "100%",
-          maxWidth: "800px",
-          mx: "auto",
-          mb: 3,
-        }}
-      >
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          muted
-          style={{
-            width: "100%",
-            minHeight: "400px",
-            display: "block",
-            backgroundColor: "#000",
-            border: isDetecting ? "3px solid #4CAF50" : "3px solid #2196F3",
-            borderRadius: "8px",
-          }}
-        />
-        <canvas
-          ref={canvasRef}
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            pointerEvents: "none",
-          }}
-        />
-      </Box>
-
-      {detections.length > 0 && isCameraActive && (
-        <Paper elevation={3} sx={{ p: 3, maxWidth: "800px", mx: "auto" }}>
-          <Typography variant="h5" gutterBottom>
-            Detected Objects ({detections.length})
-          </Typography>
-          <List>
-            {detections.map((detection, index) => (
-              <ListItem key={index} divider={index < detections.length - 1}>
-                <ListItemText
-                  primary={detection.categories[0].categoryName}
-                  secondary={`Confidence: ${Math.round(
-                    detection.categories[0].score * 100
-                  )}%`}
-                  primaryTypographyProps={{
-                    fontWeight: "bold",
-                    textTransform: "capitalize",
-                  }}
-                />
-              </ListItem>
-            ))}
-          </List>
-        </Paper>
-      )}
-
-      {!objectDetector && (
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 3, gap: 2 }}>
-          <CircularProgress size={24} />
-          <Typography variant="body1" color="text.secondary">
-            Loading object detector model...
-          </Typography>
-        </Box>
-      )}
-    </Container>
+    <HomePage
+      statusMessage={statusMessage}
+      objectDetector={objectDetector}
+      isCameraActive={isCameraActive}
+      isDetecting={isDetecting}
+      detections={detections}
+      videoRef={videoRef}
+      canvasRef={canvasRef}
+      onStartCamera={startCamera}
+      onStopCamera={stopCamera}
+      onToggleDetection={() => setIsDetecting(!isDetecting)}
+    />
   );
 }
 
