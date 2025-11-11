@@ -1,4 +1,5 @@
 import { FilesetResolver, ObjectDetector } from "@mediapipe/tasks-vision";
+import DETECTION from "../constants/DETECTION";
 
 export default class ObjectDetectionUtils {
   constructor() {
@@ -12,12 +13,12 @@ export default class ObjectDetectionUtils {
         wasmPath: "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm",
         modelPath:
           "https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite",
-        scoreThreshold: options.scoreThreshold || 0.5,
+        scoreThreshold: options.scoreThreshold || DETECTION.SCORE_THRESHOLD,
         runningMode: options.runningMode || "VIDEO",
       };
 
       const vision = await FilesetResolver.forVisionTasks(
-        defaultOptions.wasmPath,
+        defaultOptions.wasmPath
       );
 
       this.detector = await ObjectDetector.createFromOptions(vision, {
@@ -81,7 +82,7 @@ export default class ObjectDetectionUtils {
 
       // Draw label background
       const label = `${detection.categories[0].categoryName} (${Math.round(
-        detection.categories[0].score * 100,
+        detection.categories[0].score * 100
       )}%)`;
       ctx.font = "18px Ubuntu";
       const textWidth = ctx.measureText(label).width;

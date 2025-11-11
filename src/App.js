@@ -3,6 +3,7 @@ import CameraUtils from "./nonview/core/CameraUtils";
 import ObjectDetectionUtils from "./nonview/core/ObjectDetectionUtils";
 import AppUtils from "./nonview/core/AppUtils";
 import HomePage from "./view/pages/HomePage";
+import DETECTION from "./nonview/constants/DETECTION";
 
 function App() {
   const [detections, setDetections] = useState([]);
@@ -21,7 +22,7 @@ function App() {
       try {
         const detectionUtils = detectionUtilsRef.current;
         const detector = await detectionUtils.initialize({
-          scoreThreshold: 0.5,
+          scoreThreshold: DETECTION.SCORE_THRESHOLD,
           runningMode: "VIDEO",
         });
         setObjectDetector(detector);
