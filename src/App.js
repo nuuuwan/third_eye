@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { FilesetResolver, ObjectDetector } from "@mediapipe/tasks-vision";
 import CameraUtils from "./nonview/core/CameraUtils";
+import ObjectDetectionUtils from "./nonview/core/ObjectDetectionUtils";
 import HomePage from "./view/pages/HomePage";
 
 function App() {
@@ -12,21 +12,15 @@ function App() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const cameraUtilsRef = useRef(new CameraUtils());
+  const detectionUtilsRef = useRef(new ObjectDetectionUtils());
   const animationFrameRef = useRef(null);
-  const lastDetectionTimeRef = useRef(0);
 
   // Initialize the object detector
   useEffect(() => {
     const initializeDetector = async () => {
       try {
-        const vision = await FilesetResolver.forVisionTasks(
-          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm"
-        );
-        const detector = await ObjectDetector.createFromOptions(vision, {
-          baseOptions: {
-            modelAssetPath:
-              "https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite",
-          },
+        const detectionUtils = detectionUtilsRef.current;
+        const detector = await detectionUtils.initialize({
           scoreThreshold: 0.5,
           runningMode: "VIDEO",
         });
@@ -92,25 +86,20 @@ function App() {
 
     const video = videoRef.current;
     const canvas = canvasRef.current;
+    const detectionUtils = detectionUtilsRef.current;
 
     // Only detect if video is playing
     if (video.readyState === video.HAVE_ENOUGH_DATA) {
       const now = Date.now();
 
-      try {
-        // Detect objects in the current video frame
-        const detectionResult = objectDetector.detectForVideo(video, now);
+      // Detect objects in the current video frame
+      const detectionResult = detectionUtils.detectForVideo(video, now);
 
-        // Update detections state
-        setDetections(detectionResult.detections);
+      // Update detections state
+      setDetections(detectionResult.detections);
 
-        // Draw bounding boxes on canvas
-        drawVideoDetections(detectionResult.detections, canvas, video);
-
-        lastDetectionTimeRef.current = now;
-      } catch (error) {
-        console.error("Error detecting objects in video:", error);
-      }
+      // Draw bounding boxes on canvas
+      detectionUtils.drawDetections(detectionResult.detections, canvas, video);
     }
 
     // Continue the loop
@@ -133,53 +122,24 @@ function App() {
     };
   }, [isDetecting, objectDetector, detectVideoFrame]);
 
-  // Cleanup camera on unmount
+  // Cleanup camera and detector on unmount
   useEffect(() => {
+    const detectionUtils = detectionUtilsRef.current;
+    const cameraUtils = cameraUtilsRef.current;
+
     return () => {
-      stopCamera();
+      // Stop detection loop
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+
+      // Stop camera
+      cameraUtils.stopCamera();
+
+      // Dispose detector
+      detectionUtils.dispose();
     };
   }, []);
-
-  // Draw bounding boxes on canvas (for video)
-  const drawVideoDetections = (detections, canvas, video) => {
-    const ctx = canvas.getContext("2d");
-
-    // Match canvas size to video size
-    if (
-      canvas.width !== video.videoWidth ||
-      canvas.height !== video.videoHeight
-    ) {
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-    }
-
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Draw each detection
-    detections.forEach((detection) => {
-      const bbox = detection.boundingBox;
-
-      // Draw bounding box
-      ctx.strokeStyle = "#00FF00";
-      ctx.lineWidth = 4;
-      ctx.strokeRect(bbox.originX, bbox.originY, bbox.width, bbox.height);
-
-      // Draw label background
-      const label = `${detection.categories[0].categoryName} (${Math.round(
-        detection.categories[0].score * 100
-      )}%)`;
-      ctx.font = "18px Arial";
-      const textWidth = ctx.measureText(label).width;
-
-      ctx.fillStyle = "#00FF00";
-      ctx.fillRect(bbox.originX, bbox.originY - 30, textWidth + 10, 30);
-
-      // Draw label text
-      ctx.fillStyle = "#000000";
-      ctx.fillText(label, bbox.originX + 5, bbox.originY - 8);
-    });
-  };
 
   return (
     <HomePage
