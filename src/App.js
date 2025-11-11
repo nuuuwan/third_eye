@@ -1,6 +1,7 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import CameraUtils from "./nonview/core/CameraUtils";
 import ObjectDetectionUtils from "./nonview/core/ObjectDetectionUtils";
+import AppUtils from "./nonview/core/AppUtils";
 import HomePage from "./view/pages/HomePage";
 
 function App() {
@@ -13,7 +14,7 @@ function App() {
   const canvasRef = useRef(null);
   const cameraUtilsRef = useRef(new CameraUtils());
   const detectionUtilsRef = useRef(new ObjectDetectionUtils());
-  const animationFrameRef = useRef(null);
+  const appUtilsRef = useRef(new AppUtils());
 
   // Initialize the object detector
   useEffect(() => {
@@ -59,7 +60,7 @@ function App() {
       alert(
         "Error accessing camera: " +
           error.message +
-          "\n\nPlease make sure you've granted camera permissions.",
+          "\n\nPlease make sure you've granted camera permissions."
       );
     }
   };
@@ -67,10 +68,9 @@ function App() {
   // Stop camera
   const stopCamera = () => {
     setIsDetecting(false);
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-      animationFrameRef.current = null;
-    }
+
+    const appUtils = appUtilsRef.current;
+    appUtils.stopDetectionLoop();
 
     const cameraUtils = cameraUtilsRef.current;
     cameraUtils.stopCamera();
@@ -78,65 +78,43 @@ function App() {
     setStatusMessage("");
   };
 
-  // Real-time detection loop
-  const detectVideoFrame = useCallback(() => {
-    if (
-      !isDetecting ||
-      !videoRef.current ||
-      !objectDetector ||
-      !canvasRef.current
-    ) {
-      return;
-    }
-
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    const detectionUtils = detectionUtilsRef.current;
-
-    // Only detect if video is playing
-    if (video.readyState === video.HAVE_ENOUGH_DATA) {
-      const now = Date.now();
-
-      // Detect objects in the current video frame
-      const detectionResult = detectionUtils.detectForVideo(video, now);
-
-      // Update detections state
-      setDetections(detectionResult.detections);
-
-      // Draw bounding boxes on canvas
-      detectionUtils.drawDetections(detectionResult.detections, canvas, video);
-    }
-
-    // Continue the loop
-    animationFrameRef.current = requestAnimationFrame(detectVideoFrame);
-  }, [isDetecting, objectDetector]);
-
   // Start/stop detection when isDetecting changes
   useEffect(() => {
-    if (isDetecting) {
-      detectVideoFrame();
-    } else if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-      animationFrameRef.current = null;
+    const appUtils = appUtilsRef.current;
+    const detectionUtils = detectionUtilsRef.current;
+
+    if (
+      isDetecting &&
+      videoRef.current &&
+      canvasRef.current &&
+      objectDetector
+    ) {
+      appUtils.startDetectionLoop({
+        video: videoRef.current,
+        canvas: canvasRef.current,
+        detectionUtils: detectionUtils,
+        objectDetector: objectDetector,
+        onDetections: (detections) => setDetections(detections),
+        isDetecting: isDetecting,
+      });
+    } else {
+      appUtils.stopDetectionLoop();
     }
 
     return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
+      appUtils.stopDetectionLoop();
     };
-  }, [isDetecting, objectDetector, detectVideoFrame]);
+  }, [isDetecting, objectDetector]);
 
   // Cleanup camera and detector on unmount
   useEffect(() => {
     const detectionUtils = detectionUtilsRef.current;
     const cameraUtils = cameraUtilsRef.current;
+    const appUtils = appUtilsRef.current;
 
     return () => {
       // Stop detection loop
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
+      appUtils.cleanup();
 
       // Stop camera
       cameraUtils.stopCamera();
