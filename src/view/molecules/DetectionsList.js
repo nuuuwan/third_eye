@@ -16,7 +16,7 @@ export default function DetectionsList({ detections, isCameraActive }) {
             <ListItemText
               primary={detection.categories[0].categoryName}
               secondary={`Confidence: ${Math.round(
-                detection.categories[0].score * 100
+                detection.categories[0].score * 100,
               )}%`}
               primaryTypographyProps={{
                 fontWeight: "bold",

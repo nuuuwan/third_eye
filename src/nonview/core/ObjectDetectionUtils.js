@@ -22,7 +22,7 @@ export default class ObjectDetectionUtils {
       };
 
       const vision = await FilesetResolver.forVisionTasks(
-        defaultOptions.wasmPath
+        defaultOptions.wasmPath,
       );
 
       this.detector = await ObjectDetector.createFromOptions(vision, {
@@ -98,7 +98,7 @@ export default class ObjectDetectionUtils {
 
       // Draw label background
       const label = `${detection.categories[0].categoryName} (${Math.round(
-        detection.categories[0].score * 100
+        detection.categories[0].score * 100,
       )}%)`;
       ctx.font = "18px Arial";
       const textWidth = ctx.measureText(label).width;
