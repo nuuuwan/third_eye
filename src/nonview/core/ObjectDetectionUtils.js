@@ -83,7 +83,7 @@ export default class ObjectDetectionUtils {
       const label = `${detection.categories[0].categoryName} (${Math.round(
         detection.categories[0].score * 100
       )}%)`;
-      ctx.font = "18px Arial";
+      ctx.font = "18px Ubuntu";
       const textWidth = ctx.measureText(label).width;
 
       ctx.fillStyle = "#00FF00";
