@@ -59,7 +59,7 @@ function App() {
       alert(
         "Error accessing camera: " +
           error.message +
-          "\n\nPlease make sure you've granted camera permissions."
+          "\n\nPlease make sure you've granted camera permissions.",
       );
     }
   };
