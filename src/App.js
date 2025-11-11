@@ -3,15 +3,12 @@ import { FilesetResolver, ObjectDetector } from "@mediapipe/tasks-vision";
 import CameraUtils from "./nonview/core/CameraUtils";
 
 function App() {
-  const [selectedImage, setSelectedImage] = useState(null);
   const [detections, setDetections] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [objectDetector, setObjectDetector] = useState(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [isDetecting, setIsDetecting] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
   const videoRef = useRef(null);
-  const imageRef = useRef(null);
   const canvasRef = useRef(null);
   const cameraUtilsRef = useRef(new CameraUtils());
   const animationFrameRef = useRef(null);
@@ -54,9 +51,8 @@ function App() {
 
       console.log("Camera access granted");
       setIsCameraActive(true);
-      setSelectedImage(null);
       setDetections([]);
-      setStatusMessage("Camera active - ready to capture!");
+      setStatusMessage("Camera active - ready for detection!");
     } catch (error) {
       console.error("Error accessing camera:", error);
       setStatusMessage("");
@@ -80,16 +76,6 @@ function App() {
     cameraUtils.stopCamera();
     setIsCameraActive(false);
     setStatusMessage("");
-  };
-
-  // Capture image from camera
-  const captureImage = () => {
-    if (!videoRef.current) return;
-
-    const cameraUtils = cameraUtilsRef.current;
-    const imageDataUrl = cameraUtils.captureImage(videoRef.current);
-    setSelectedImage(imageDataUrl);
-    stopCamera();
   };
 
   // Real-time detection loop
@@ -153,64 +139,6 @@ function App() {
     };
   }, []);
 
-  // Detect objects in the image
-  const detectObjects = async () => {
-    if (!objectDetector || !imageRef.current) {
-      alert("Detector not ready or no image loaded");
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const detectionResult = objectDetector.detect(imageRef.current);
-      setDetections(detectionResult.detections);
-      drawDetections(detectionResult.detections);
-    } catch (error) {
-      console.error("Error detecting objects:", error);
-      alert("Error detecting objects: " + error.message);
-    }
-    setIsLoading(false);
-  };
-
-  // Draw bounding boxes on canvas (for static images)
-  const drawDetections = (detections) => {
-    const canvas = canvasRef.current;
-    const image = imageRef.current;
-
-    if (!canvas || !image) return;
-
-    const ctx = canvas.getContext("2d");
-    canvas.width = image.width;
-    canvas.height = image.height;
-
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Draw each detection
-    detections.forEach((detection) => {
-      const bbox = detection.boundingBox;
-
-      // Draw bounding box
-      ctx.strokeStyle = "#00FF00";
-      ctx.lineWidth = 3;
-      ctx.strokeRect(bbox.originX, bbox.originY, bbox.width, bbox.height);
-
-      // Draw label background
-      const label = `${detection.categories[0].categoryName} (${Math.round(
-        detection.categories[0].score * 100
-      )}%)`;
-      ctx.font = "16px Arial";
-      const textWidth = ctx.measureText(label).width;
-
-      ctx.fillStyle = "#00FF00";
-      ctx.fillRect(bbox.originX, bbox.originY - 25, textWidth + 10, 25);
-
-      // Draw label text
-      ctx.fillStyle = "#000000";
-      ctx.fillText(label, bbox.originX + 5, bbox.originY - 7);
-    });
-  };
-
   // Draw bounding boxes on canvas (for video)
   const drawVideoDetections = (detections, canvas, video) => {
     const ctx = canvas.getContext("2d");
@@ -270,7 +198,7 @@ function App() {
         )}
 
         <div style={{ marginBottom: "20px" }}>
-          {!isCameraActive && !selectedImage && (
+          {!isCameraActive && (
             <button
               onClick={startCamera}
               style={{
@@ -311,21 +239,6 @@ function App() {
                 {isDetecting ? "Stop Detection" : "Start Detection"}
               </button>
               <button
-                onClick={captureImage}
-                style={{
-                  padding: "10px 20px",
-                  fontSize: "16px",
-                  cursor: "pointer",
-                  backgroundColor: "#9C27B0",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "4px",
-                  marginRight: "10px",
-                }}
-              >
-                Capture Image
-              </button>
-              <button
                 onClick={stopCamera}
                 style={{
                   padding: "10px 20px",
@@ -339,46 +252,6 @@ function App() {
                 }}
               >
                 Stop Camera
-              </button>
-            </>
-          )}
-
-          {selectedImage && (
-            <>
-              <button
-                onClick={detectObjects}
-                disabled={!objectDetector || isLoading}
-                style={{
-                  padding: "10px 20px",
-                  fontSize: "16px",
-                  cursor:
-                    !objectDetector || isLoading ? "not-allowed" : "pointer",
-                  backgroundColor:
-                    !objectDetector || isLoading ? "#ccc" : "#4CAF50",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "4px",
-                  marginRight: "10px",
-                }}
-              >
-                {isLoading ? "Detecting..." : "Detect Objects"}
-              </button>
-              <button
-                onClick={() => {
-                  setSelectedImage(null);
-                  setDetections([]);
-                }}
-                style={{
-                  padding: "10px 20px",
-                  fontSize: "16px",
-                  cursor: "pointer",
-                  backgroundColor: "#9E9E9E",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "4px",
-                }}
-              >
-                Take Another Photo
               </button>
             </>
           )}
@@ -419,30 +292,7 @@ function App() {
           />
         </div>
 
-        {selectedImage && (
-          <div style={{ position: "relative", display: "inline-block" }}>
-            <img
-              ref={imageRef}
-              src={selectedImage}
-              alt="Captured"
-              style={{ maxWidth: "100%", height: "auto", display: "block" }}
-              onLoad={() => {
-                // Image loaded, ready for detection
-              }}
-            />
-            <canvas
-              ref={canvasRef}
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                pointerEvents: "none",
-              }}
-            />
-          </div>
-        )}
-
-        {detections.length > 0 && (isCameraActive || selectedImage) && (
+        {detections.length > 0 && isCameraActive && (
           <div style={{ marginTop: "20px" }}>
             <h2>Detected Objects ({detections.length})</h2>
             <ul style={{ textAlign: "left" }}>

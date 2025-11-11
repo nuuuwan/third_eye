@@ -56,26 +56,6 @@ export default class CameraUtils {
   }
 
   /**
-   * Capture an image from the video element
-   * @param {HTMLVideoElement} videoElement - The video element to capture from
-   * @returns {string} - Data URL of the captured image
-   */
-  captureImage(videoElement) {
-    if (!videoElement) {
-      throw new Error("Video element is required");
-    }
-
-    const canvas = document.createElement("canvas");
-    canvas.width = videoElement.videoWidth;
-    canvas.height = videoElement.videoHeight;
-
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(videoElement, 0, 0);
-
-    return canvas.toDataURL("image/png");
-  }
-
-  /**
    * Check if camera is currently active
    * @returns {boolean}
    */
