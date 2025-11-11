@@ -36,7 +36,7 @@ export default class AppUtils {
           detectionUtils.drawDetections(
             detectionResult.detections,
             canvas,
-            video
+            video,
           );
         } catch (error) {
           console.error("Error in detection loop:", error);
