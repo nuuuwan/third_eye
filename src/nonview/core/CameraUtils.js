@@ -4,12 +4,6 @@ export default class CameraUtils {
     this.videoElement = null;
   }
 
-  /**
-   * Start the camera and attach it to a video element
-   * @param {HTMLVideoElement} videoElement - The video element to attach the stream to
-   * @param {object} options - Camera options (facingMode, etc.)
-   * @returns {Promise<MediaStream>} - The camera stream
-   */
   async startCamera(videoElement, options = {}) {
     try {
       const defaultOptions = {
@@ -23,7 +17,6 @@ export default class CameraUtils {
       if (videoElement) {
         videoElement.srcObject = this.stream;
 
-        // Return a promise that resolves when video is ready
         return new Promise((resolve, reject) => {
           videoElement.onloadedmetadata = () => {
             videoElement
@@ -41,9 +34,6 @@ export default class CameraUtils {
     }
   }
 
-  /**
-   * Stop the camera stream
-   */
   stopCamera() {
     if (this.stream) {
       this.stream.getTracks().forEach((track) => track.stop());
@@ -55,28 +45,14 @@ export default class CameraUtils {
     }
   }
 
-  /**
-   * Check if camera is currently active
-   * @returns {boolean}
-   */
   isActive() {
     return this.stream !== null && this.stream.active;
   }
 
-  /**
-   * Get the current stream
-   * @returns {MediaStream|null}
-   */
   getStream() {
     return this.stream;
   }
 
-  /**
-   * Switch between front and back camera
-   * @param {HTMLVideoElement} videoElement
-   * @param {string} facingMode - 'user' or 'environment'
-   * @returns {Promise<MediaStream>}
-   */
   async switchCamera(videoElement, facingMode = "environment") {
     this.stopCamera();
     return this.startCamera(videoElement, { facingMode });

@@ -6,11 +6,6 @@ export default class ObjectDetectionUtils {
     this.isInitialized = false;
   }
 
-  /**
-   * Initialize the object detector
-   * @param {object} options - Configuration options for the detector
-   * @returns {Promise<ObjectDetector>}
-   */
   async initialize(options = {}) {
     try {
       const defaultOptions = {
@@ -22,7 +17,7 @@ export default class ObjectDetectionUtils {
       };
 
       const vision = await FilesetResolver.forVisionTasks(
-        defaultOptions.wasmPath,
+        defaultOptions.wasmPath
       );
 
       this.detector = await ObjectDetector.createFromOptions(vision, {
@@ -41,12 +36,6 @@ export default class ObjectDetectionUtils {
     }
   }
 
-  /**
-   * Detect objects in a video frame
-   * @param {HTMLVideoElement} video - The video element to detect objects in
-   * @param {number} timestamp - Current timestamp in milliseconds
-   * @returns {object} - Detection results
-   */
   detectForVideo(video, timestamp) {
     if (!this.detector) {
       throw new Error("Detector not initialized");
@@ -64,12 +53,6 @@ export default class ObjectDetectionUtils {
     }
   }
 
-  /**
-   * Draw detection results on a canvas
-   * @param {array} detections - Array of detection objects
-   * @param {HTMLCanvasElement} canvas - Canvas to draw on
-   * @param {HTMLVideoElement} video - Video element (for sizing)
-   */
   drawDetections(detections, canvas, video) {
     if (!canvas || !video) return;
 
@@ -98,7 +81,7 @@ export default class ObjectDetectionUtils {
 
       // Draw label background
       const label = `${detection.categories[0].categoryName} (${Math.round(
-        detection.categories[0].score * 100,
+        detection.categories[0].score * 100
       )}%)`;
       ctx.font = "18px Arial";
       const textWidth = ctx.measureText(label).width;
@@ -112,29 +95,16 @@ export default class ObjectDetectionUtils {
     });
   }
 
-  /**
-   * Check if detector is initialized
-   * @returns {boolean}
-   */
   isReady() {
     return this.isInitialized && this.detector !== null;
   }
 
-  /**
-   * Get the detector instance
-   * @returns {ObjectDetector|null}
-   */
   getDetector() {
     return this.detector;
   }
 
-  /**
-   * Clean up resources
-   */
   dispose() {
     if (this.detector) {
-      // MediaPipe detectors don't have explicit dispose methods
-      // but we can clear the reference
       this.detector = null;
       this.isInitialized = false;
     }

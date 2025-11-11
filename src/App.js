@@ -16,7 +16,6 @@ function App() {
   const detectionUtilsRef = useRef(new ObjectDetectionUtils());
   const appUtilsRef = useRef(new AppUtils());
 
-  // Initialize the object detector
   useEffect(() => {
     const initializeDetector = async () => {
       try {
@@ -34,7 +33,6 @@ function App() {
     initializeDetector();
   }, []);
 
-  // Start camera and detection
   const startCamera = async () => {
     try {
       setStatusMessage("Requesting camera access...");
@@ -50,7 +48,6 @@ function App() {
       setDetections([]);
       setStatusMessage("Camera active - detecting objects...");
 
-      // Automatically start detection
       if (objectDetector) {
         setIsDetecting(true);
       }
@@ -65,7 +62,6 @@ function App() {
     }
   };
 
-  // Stop camera
   const stopCamera = () => {
     setIsDetecting(false);
 
@@ -78,7 +74,6 @@ function App() {
     setStatusMessage("");
   };
 
-  // Start/stop detection when isDetecting changes
   useEffect(() => {
     const appUtils = appUtilsRef.current;
     const detectionUtils = detectionUtilsRef.current;
@@ -106,20 +101,14 @@ function App() {
     };
   }, [isDetecting, objectDetector]);
 
-  // Cleanup camera and detector on unmount
   useEffect(() => {
     const detectionUtils = detectionUtilsRef.current;
     const cameraUtils = cameraUtilsRef.current;
     const appUtils = appUtilsRef.current;
 
     return () => {
-      // Stop detection loop
       appUtils.cleanup();
-
-      // Stop camera
       cameraUtils.stopCamera();
-
-      // Dispose detector
       detectionUtils.dispose();
     };
   }, []);
