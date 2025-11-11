@@ -15,7 +15,6 @@ export default function HomePage({
   canvasRef,
   onStartCamera,
   onStopCamera,
-  onToggleDetection,
 }) {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -27,11 +26,8 @@ export default function HomePage({
 
       <ControlButtons
         isCameraActive={isCameraActive}
-        isDetecting={isDetecting}
-        objectDetector={objectDetector}
         onStartCamera={onStartCamera}
         onStopCamera={onStopCamera}
-        onToggleDetection={onToggleDetection}
       />
 
       <VideoDisplay

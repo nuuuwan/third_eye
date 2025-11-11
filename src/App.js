@@ -33,7 +33,7 @@ function App() {
     initializeDetector();
   }, []);
 
-  // Start camera
+  // Start camera and detection
   const startCamera = async () => {
     try {
       setStatusMessage("Requesting camera access...");
@@ -47,14 +47,19 @@ function App() {
       console.log("Camera access granted");
       setIsCameraActive(true);
       setDetections([]);
-      setStatusMessage("Camera active - ready for detection!");
+      setStatusMessage("Camera active - detecting objects...");
+
+      // Automatically start detection
+      if (objectDetector) {
+        setIsDetecting(true);
+      }
     } catch (error) {
       console.error("Error accessing camera:", error);
       setStatusMessage("");
       alert(
         "Error accessing camera: " +
           error.message +
-          "\n\nPlease make sure you've granted camera permissions.",
+          "\n\nPlease make sure you've granted camera permissions."
       );
     }
   };
@@ -152,7 +157,6 @@ function App() {
       canvasRef={canvasRef}
       onStartCamera={startCamera}
       onStopCamera={stopCamera}
-      onToggleDetection={() => setIsDetecting(!isDetecting)}
     />
   );
 }
