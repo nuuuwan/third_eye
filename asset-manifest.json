@@ -1,12 +1,12 @@
 {
   "files": {
     "main.css": "/third_eye/static/css/main.4efb37a3.css",
-    "main.js": "/third_eye/static/js/main.0638b1ef.js",
+    "main.js": "/third_eye/static/js/main.b68de542.js",
     "static/js/206.deeb2eb0.chunk.js": "/third_eye/static/js/206.deeb2eb0.chunk.js",
     "index.html": "/third_eye/index.html"
   },
   "entrypoints": [
     "static/css/main.4efb37a3.css",
-    "static/js/main.0638b1ef.js"
+    "static/js/main.b68de542.js"
   ]
 }
