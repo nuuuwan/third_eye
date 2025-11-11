@@ -3,6 +3,7 @@ import CameraUtils from "./nonview/core/CameraUtils";
 import ObjectDetectionUtils from "./nonview/core/ObjectDetectionUtils";
 import AppUtils from "./nonview/core/AppUtils";
 import HomePage from "./view/pages/HomePage";
+import ConfirmDialog from "./view/molecules/ConfirmDialog";
 import DETECTION from "./nonview/constants/DETECTION";
 
 function App() {
@@ -12,6 +13,8 @@ function App() {
   const [isDetecting, setIsDetecting] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
   const [statusSeverity, setStatusSeverity] = useState("info");
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [pendingVideoBlob, setPendingVideoBlob] = useState(null);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const cameraUtilsRef = useRef(new CameraUtils());
@@ -85,23 +88,33 @@ function App() {
     setStatusMessage("");
 
     if (videoBlob) {
-      const shouldSave = window.confirm("Do you want to save the video?");
-
-      if (shouldSave) {
-        const url = URL.createObjectURL(videoBlob);
-        const a = document.createElement("a");
-        a.style.display = "none";
-        a.href = url;
-        const extension = videoBlob.type.includes("mp4") ? "mp4" : "webm";
-        a.download = `third_eye_${new Date().getTime()}.${extension}`;
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => {
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-        }, 100);
-      }
+      setPendingVideoBlob(videoBlob);
+      setShowSaveDialog(true);
     }
+  };
+
+  const handleSaveVideo = () => {
+    if (pendingVideoBlob) {
+      const url = URL.createObjectURL(pendingVideoBlob);
+      const a = document.createElement("a");
+      a.style.display = "none";
+      a.href = url;
+      const extension = pendingVideoBlob.type.includes("mp4") ? "mp4" : "webm";
+      a.download = `third_eye_${new Date().getTime()}.${extension}`;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 100);
+    }
+    setShowSaveDialog(false);
+    setPendingVideoBlob(null);
+  };
+
+  const handleDiscardVideo = () => {
+    setShowSaveDialog(false);
+    setPendingVideoBlob(null);
   };
 
   useEffect(() => {
@@ -144,18 +157,27 @@ function App() {
   }, []);
 
   return (
-    <HomePage
-      statusMessage={statusMessage}
-      statusSeverity={statusSeverity}
-      objectDetector={objectDetector}
-      isCameraActive={isCameraActive}
-      isDetecting={isDetecting}
-      detections={detections}
-      videoRef={videoRef}
-      canvasRef={canvasRef}
-      onStartCamera={startCamera}
-      onStopCamera={stopCamera}
-    />
+    <>
+      <HomePage
+        statusMessage={statusMessage}
+        statusSeverity={statusSeverity}
+        objectDetector={objectDetector}
+        isCameraActive={isCameraActive}
+        isDetecting={isDetecting}
+        detections={detections}
+        videoRef={videoRef}
+        canvasRef={canvasRef}
+        onStartCamera={startCamera}
+        onStopCamera={stopCamera}
+      />
+      <ConfirmDialog
+        open={showSaveDialog}
+        title="Save Video"
+        message="Do you want to save the recorded video?"
+        onYes={handleSaveVideo}
+        onNo={handleDiscardVideo}
+      />
+    </>
   );
 }
 
