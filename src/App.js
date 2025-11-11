@@ -11,6 +11,7 @@ function App() {
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [isDetecting, setIsDetecting] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
+  const [statusSeverity, setStatusSeverity] = useState("info");
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const cameraUtilsRef = useRef(new CameraUtils());
@@ -20,14 +21,20 @@ function App() {
   useEffect(() => {
     const initializeDetector = async () => {
       try {
+        setStatusMessage("Loading object detection model...");
+        setStatusSeverity("info");
         const detectionUtils = detectionUtilsRef.current;
         const detector = await detectionUtils.initialize({
           scoreThreshold: DETECTION.SCORE_THRESHOLD,
           runningMode: "VIDEO",
         });
         setObjectDetector(detector);
+        setStatusMessage("Object detection model loaded. Ready to start!");
+        setStatusSeverity("success");
       } catch (error) {
         console.error("Error initializing object detector:", error);
+        setStatusMessage("Error loading detection model");
+        setStatusSeverity("error");
       }
     };
 
@@ -37,6 +44,7 @@ function App() {
   const startCamera = async () => {
     try {
       setStatusMessage("Requesting camera access...");
+      setStatusSeverity("info");
       console.log("Requesting camera access...");
 
       const cameraUtils = cameraUtilsRef.current;
@@ -48,6 +56,7 @@ function App() {
       setIsCameraActive(true);
       setDetections([]);
       setStatusMessage("Camera active - detecting objects...");
+      setStatusSeverity("success");
 
       cameraUtils.startRecording();
 
@@ -56,12 +65,8 @@ function App() {
       }
     } catch (error) {
       console.error("Error accessing camera:", error);
-      setStatusMessage("");
-      alert(
-        "Error accessing camera: " +
-          error.message +
-          "\n\nPlease make sure you've granted camera permissions."
-      );
+      setStatusMessage("Error accessing camera: " + error.message);
+      setStatusSeverity("error");
     }
   };
 
@@ -141,6 +146,7 @@ function App() {
   return (
     <HomePage
       statusMessage={statusMessage}
+      statusSeverity={statusSeverity}
       objectDetector={objectDetector}
       isCameraActive={isCameraActive}
       isDetecting={isDetecting}

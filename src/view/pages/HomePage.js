@@ -6,6 +6,7 @@ import VideoDisplay from "../molecules/VideoDisplay";
 
 export default function HomePage({
   statusMessage,
+  statusSeverity,
   objectDetector,
   isCameraActive,
   isDetecting,
@@ -17,7 +18,9 @@ export default function HomePage({
   return (
     <>
       <Container maxWidth="lg" sx={{ py: 4, pb: 10 }}>
-        {!isCameraActive && <StatusMessage message={statusMessage} />}
+        {!isCameraActive && (
+          <StatusMessage message={statusMessage} severity={statusSeverity} />
+        )}
 
         <VideoDisplay
           videoRef={videoRef}

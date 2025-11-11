@@ -1,11 +1,11 @@
-import { Typography } from "@mui/material";
+import { Alert } from "@mui/material";
 
-export default function StatusMessage({ message }) {
+export default function StatusMessage({ message, severity = "info" }) {
   if (!message) return null;
 
   return (
-    <Typography variant="body1" color="primary" sx={{ mb: 2 }} align="center">
+    <Alert severity={severity} sx={{ mb: 2 }}>
       {message}
-    </Typography>
+    </Alert>
   );
 }
