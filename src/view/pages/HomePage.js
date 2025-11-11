@@ -19,10 +19,6 @@ export default function HomePage({
   return (
     <>
       <Container maxWidth="lg" sx={{ py: 4, pb: 10 }}>
-        <Typography variant="h3" component="h1" gutterBottom align="center">
-          Third Eye - Object Detection
-        </Typography>
-
         <StatusMessage message={statusMessage} />
 
         <VideoDisplay
