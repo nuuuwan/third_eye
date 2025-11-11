@@ -9,7 +9,6 @@ export default function HomePage({
   objectDetector,
   isCameraActive,
   isDetecting,
-  detections,
   videoRef,
   canvasRef,
   onStartCamera,
