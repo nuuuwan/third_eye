@@ -17,7 +17,7 @@ export default function HomePage({
   return (
     <>
       <Container maxWidth="lg" sx={{ py: 4, pb: 10 }}>
-        <StatusMessage message={statusMessage} />
+        {!isCameraActive && <StatusMessage message={statusMessage} />}
 
         <VideoDisplay
           videoRef={videoRef}
