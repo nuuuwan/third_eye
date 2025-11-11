@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { FilesetResolver, ObjectDetector } from "@mediapipe/tasks-vision";
+import CameraUtils from "./nonview/core/CameraUtils";
 
 function App() {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -12,7 +13,7 @@ function App() {
   const videoRef = useRef(null);
   const imageRef = useRef(null);
   const canvasRef = useRef(null);
-  const streamRef = useRef(null);
+  const cameraUtilsRef = useRef(new CameraUtils());
   const animationFrameRef = useRef(null);
   const lastDetectionTimeRef = useRef(0);
 
@@ -21,7 +22,7 @@ function App() {
     const initializeDetector = async () => {
       try {
         const vision = await FilesetResolver.forVisionTasks(
-          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm",
+          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm"
         );
         const detector = await ObjectDetector.createFromOptions(vision, {
           baseOptions: {
@@ -46,45 +47,23 @@ function App() {
       setStatusMessage("Requesting camera access...");
       console.log("Requesting camera access...");
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" }, // Use back camera on mobile
-        audio: false,
+      const cameraUtils = cameraUtilsRef.current;
+      await cameraUtils.startCamera(videoRef.current, {
+        facingMode: "environment",
       });
 
-      console.log("Camera access granted, stream:", stream);
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        streamRef.current = stream;
-
-        // Wait for video to actually start playing
-        videoRef.current.onloadedmetadata = () => {
-          console.log("Video metadata loaded");
-          videoRef.current
-            .play()
-            .then(() => {
-              console.log("Video playing");
-              setIsCameraActive(true);
-              setSelectedImage(null);
-              setDetections([]);
-              setStatusMessage("Camera active - ready to capture!");
-            })
-            .catch((err) => {
-              console.error("Error playing video:", err);
-              setStatusMessage("Error starting video: " + err.message);
-            });
-        };
-      } else {
-        console.error("videoRef.current is null");
-        setStatusMessage("Video element not ready");
-      }
+      console.log("Camera access granted");
+      setIsCameraActive(true);
+      setSelectedImage(null);
+      setDetections([]);
+      setStatusMessage("Camera active - ready to capture!");
     } catch (error) {
       console.error("Error accessing camera:", error);
       setStatusMessage("");
       alert(
         "Error accessing camera: " +
           error.message +
-          "\n\nPlease make sure you've granted camera permissions.",
+          "\n\nPlease make sure you've granted camera permissions."
       );
     }
   };
@@ -96,27 +75,19 @@ function App() {
       cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = null;
     }
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
-      setIsCameraActive(false);
-      setStatusMessage("");
-    }
+    
+    const cameraUtils = cameraUtilsRef.current;
+    cameraUtils.stopCamera();
+    setIsCameraActive(false);
+    setStatusMessage("");
   };
 
   // Capture image from camera
   const captureImage = () => {
     if (!videoRef.current) return;
 
-    const video = videoRef.current;
-    const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(video, 0, 0);
-
-    const imageDataUrl = canvas.toDataURL("image/png");
+    const cameraUtils = cameraUtilsRef.current;
+    const imageDataUrl = cameraUtils.captureImage(videoRef.current);
     setSelectedImage(imageDataUrl);
     stopCamera();
   };
@@ -226,7 +197,7 @@ function App() {
 
       // Draw label background
       const label = `${detection.categories[0].categoryName} (${Math.round(
-        detection.categories[0].score * 100,
+        detection.categories[0].score * 100
       )}%)`;
       ctx.font = "16px Arial";
       const textWidth = ctx.measureText(label).width;
@@ -267,7 +238,7 @@ function App() {
 
       // Draw label background
       const label = `${detection.categories[0].categoryName} (${Math.round(
-        detection.categories[0].score * 100,
+        detection.categories[0].score * 100
       )}%)`;
       ctx.font = "18px Arial";
       const textWidth = ctx.measureText(label).width;
@@ -329,8 +300,8 @@ function App() {
                   backgroundColor: !objectDetector
                     ? "#ccc"
                     : isDetecting
-                      ? "#FF9800"
-                      : "#4CAF50",
+                    ? "#FF9800"
+                    : "#4CAF50",
                   color: "white",
                   border: "none",
                   borderRadius: "4px",
