@@ -75,7 +75,7 @@ function App() {
       cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = null;
     }
-    
+
     const cameraUtils = cameraUtilsRef.current;
     cameraUtils.stopCamera();
     setIsCameraActive(false);
